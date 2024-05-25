@@ -24,35 +24,34 @@ function diffGitHub_pullrequest(branchname)
     
     % Generate a comparison report for every modified model file
     for i = 1:numel(modifiedFiles)
-        report = diffToAncestor(tempdir,string(modifiedFiles(i)));
+        report = diffToAncestor(tempdir, string(modifiedFiles(i)));
     end
     
     % Delete the temporary folder
-    rmdir modelscopy s
+    rmdir(tempdir, 's');
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function report = diffToAncestor(tempdir,fileName)
-    
-    ancestor = getAncestor(tempdir,fileName);
+function report = diffToAncestor(tempdir, fileName)
+    ancestor = getAncestor(tempdir, fileName);
 
     % Compare models and publish results in a printable report
     % Specify the format using 'pdf', 'html', or 'docx'
-    comp= visdiff(ancestor, fileName);
+    comparison = slxmlcomp.compare(ancestor, fileName);
+    %reportFile = fullfile(tempdir, strcat(fileName, '_report.html'));
+    %visdiff.saveReport(comparison, reportFile);
+    %report = reportFile;
     filter(comp, 'unfiltered');
     report = publish(comp,'html');
-    
 end
 
-
-function ancestor = getAncestor(tempdir,fileName)
+function ancestor = getAncestor(tempdir, fileName)
+    [~, name, ext] = fileparts(fileName);
+    ancestor = fullfile(tempdir, strcat(name, '_ancestor', ext));
     
-    [relpath, name, ext] = fileparts(fileName);
-    ancestor = fullfile(tempdir, name);
-    
-    % Replace seperators to work with Git and create ancestor file name
+    % Replace separators to work with Git and create ancestor file name
     fileName = strrep(fileName, '\', '/');
     ancestor = strrep(sprintf('%s%s%s',ancestor, "_ancestor", ext), '\', '/');
     % Build git command to get ancestor from main
@@ -60,8 +59,6 @@ function ancestor = getAncestor(tempdir,fileName)
     gitCommand = sprintf('git --no-pager show refs/remotes/origin/main:%s > %s', fileName, ancestor);
     
     [status, result] = system(gitCommand);
-    %assert(status==0, result);
-
+    assert(status==0, result);
 end
-
 %   Copyright 2022 The MathWorks, Inc.
