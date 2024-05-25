@@ -36,11 +36,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: diffreports
-          path: ${{ github.workspace }}/*.html
+           path: ${{ github.workspace }}/*.html
            
       - name: Run All Project Tests
         uses: matlab-actions/run-command@v2
         with:
           command: runtests
-
 #   Copyright 2022-2023 The MathWorks, Inc.
